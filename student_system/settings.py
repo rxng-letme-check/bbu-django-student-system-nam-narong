@@ -15,6 +15,24 @@ from decouple import config, Csv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+import os
+import dj_database_url  # optional if using a DATABASE_URL helper
+
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", ".vercel.app,localhost,127.0.0.1").split(",")
+    if host.strip()
+]
+
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ["DATABASE_URL"],
+            conn_max_age=0,
+        )
+    }
 
 
 # Quick-start development settings - unsuitable for production
