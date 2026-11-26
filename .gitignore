@@ -3,12 +3,11 @@
 # ==============================================================================
 
 # Python bytecode and cache
-.env/
-.env
 __pycache__/
 *.py[cod]
-db.sqlite3
-staticfiles/
+*$py.class
+*.so
+.Python
 
 # Virtual Environments
 venv/
