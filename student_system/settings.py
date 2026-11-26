@@ -26,7 +26,12 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-jt%luhks(%f-u+rud531b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = list(config('ALLOWED_HOSTS', default='localhost,127.0.0.1,testserver,.onrender.com,bbu-django-student-system-demo.onrender.com', cast=Csv()))
+ALLOWED_HOSTS = [
+    "bbu-django-student-system-nam-naron.vercel.app",
+    ".vercel.app",      # allows any Vercel preview/deployment URL
+    "localhost",
+    "127.0.0.1",
+]
 if '.onrender.com' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('.onrender.com')
 RENDER_EXTERNAL_HOSTNAME = config('RENDER_EXTERNAL_HOSTNAME', default=None)
