@@ -21,11 +21,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-jt%luhks(%f-u+rud531b)xdv^*^6e=1hiu6awz9^83aj9)5-&')
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
-
+CSRF_TRUSTED_ORIGINS = ["https://*.vercel.app"]
 ALLOWED_HOSTS = [
     "bbu-django-student-system-nam-naron.vercel.app",
     ".vercel.app",      # allows any Vercel preview/deployment URL
