@@ -7,111 +7,597 @@
     <title>{% block title %}Student Management System{% endblock %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
     <style>
+        /* ============ Design tokens ============ */
+        :root {
+            --brand: #283296;
+            --brand-dark: #1c2470;
+            --brand-soft: #eef0ff;
+            --brand-ring: rgba(40, 50, 150, .22);
+            --brand-gradient: linear-gradient(135deg, #283296 0%, #1c2470 55%, #141b57 100%);
+            --accent: #f5b301;
+            --red: #d8222a;
+            --ink: #0f172a;
+            --muted: #64748b;
+            --line: #e3e6f3;
+            --page: #f3f5fb;
+            --surface: #ffffff;
+            --sidebar: #0e1550;
+            --sidebar-w: 272px;
+            --radius: 16px;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, .08);
+
+            /* Re-point Bootstrap's palette at the new theme */
+            --bs-primary: #283296;
+            --bs-primary-rgb: 40, 50, 150;
+            --bs-info: #0284c7;
+            --bs-info-rgb: 2, 132, 199;
+            --bs-success: #16a34a;
+            --bs-success-rgb: 22, 163, 74;
+            --bs-warning: #d97706;
+            --bs-warning-rgb: 217, 119, 6;
+            --bs-danger: #dc2626;
+            --bs-danger-rgb: 220, 38, 38;
+            --bs-link-color: #283296;
+            --bs-link-color-rgb: 40, 50, 150;
+            --bs-link-hover-color: #1c2470;
+            --bs-link-hover-color-rgb: 28, 36, 112;
+            --bs-body-font-family: 'Plus Jakarta Sans', 'Kantumruy Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            --bs-body-color: #1e293b;
+            --bs-border-color: #e3e6f3;
+        }
+
+        html { scroll-behavior: smooth; }
         body {
-            background-color: #f8f9fa;
+            background: var(--page);
+            font-family: var(--bs-body-font-family);
+            color: var(--bs-body-color);
+            -webkit-font-smoothing: antialiased;
         }
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        h1, h2, h3, h4, h5, h6 { color: var(--ink); font-weight: 700; letter-spacing: -.01em; }
+        a { text-decoration: none; }
+        a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+        /* ============ App shell ============ */
+        .app-sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: var(--sidebar-w);
+            background: var(--sidebar);
+            background-image: radial-gradient(circle at 0% 0%, rgba(216, 34, 42, .16), transparent 40%);
+            color: #bcc4ee;
+            display: flex; flex-direction: column;
+            z-index: 1040;
+            transition: transform .25s ease;
         }
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.3rem;
+        .app-brand {
+            display: flex; align-items: center; gap: .8rem;
+            padding: 1.4rem 1.4rem 1.2rem;
+            color: #fff; text-decoration: none !important;
         }
+        .app-brand-logo {
+            width: 42px; height: 42px; flex: none;
+            display: grid; place-items: center;
+            font-size: 1.35rem;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: 12px;
+        }
+        .app-brand-text { line-height: 1.2; }
+        .app-brand-text strong { display: block; font-size: 1rem; font-weight: 700; }
+        .app-brand-text small { color: #939dd8; font-size: .72rem; }
+
+        .app-nav { padding: .5rem .9rem; overflow-y: auto; flex: 1; }
+        .app-nav-label {
+            font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+            color: #7782c4; padding: 1rem .7rem .5rem; font-weight: 700;
+        }
+        .app-nav a {
+            display: flex; align-items: center; gap: .8rem;
+            padding: .65rem .8rem; margin-bottom: 2px;
+            color: #c9d0f2; font-weight: 500; font-size: .93rem;
+            border-radius: 10px; position: relative;
+            text-decoration: none !important;
+            transition: background .15s, color .15s;
+        }
+        .app-nav a i { width: 20px; text-align: center; font-size: .95rem; opacity: .85; }
+        .app-nav a:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+        .app-nav a.active { background: rgba(255, 255, 255, .12); color: #fff; font-weight: 600; }
+        .app-nav a.active::before {
+            content: ""; position: absolute; left: -.9rem; top: 22%; bottom: 22%;
+            width: 4px; border-radius: 0 4px 4px 0; background: var(--accent);
+        }
+
+        .app-user { padding: 1rem .9rem 1.2rem; border-top: 1px solid rgba(255, 255, 255, .08); }
+        .app-user-card {
+            display: flex; align-items: center; gap: .75rem;
+            padding: .6rem .7rem; margin-bottom: .5rem;
+            background: rgba(255, 255, 255, .06); border-radius: 12px;
+        }
+        .app-avatar {
+            width: 38px; height: 38px; flex: none; border-radius: 50%;
+            display: grid; place-items: center; font-weight: 700; color: #0e1550;
+            background: var(--accent);
+        }
+        .app-user-card .name { color: #fff; font-weight: 600; font-size: .9rem; line-height: 1.2; }
+        .app-user-card .mail { color: #939dd8; font-size: .75rem; word-break: break-all; }
+        .app-user a {
+            display: flex; align-items: center; gap: .7rem;
+            padding: .5rem .8rem; color: #c9d0f2; border-radius: 8px;
+            font-size: .88rem; text-decoration: none !important;
+        }
+        .app-user a:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+        .app-user a.logout:hover { color: #fecaca; }
+        .app-auth-actions { display: grid; gap: .5rem; }
+        .app-auth-actions .btn { font-size: .9rem; justify-content: center; }
+
+        .app-topbar {
+            display: none; position: sticky; top: 0; z-index: 1030;
+            align-items: center; justify-content: space-between;
+            padding: .75rem 1rem; background: var(--sidebar); color: #fff;
+        }
+        .app-topbar .brand { color: #fff; font-weight: 700; text-decoration: none !important; }
+        .app-toggle {
+            background: rgba(255, 255, 255, .1); border: 0; color: #fff;
+            width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem;
+        }
+        .app-overlay {
+            display: none; position: fixed; inset: 0; z-index: 1035;
+            background: rgba(2, 18, 17, .55); backdrop-filter: blur(2px);
+        }
+
+        .app-main { min-height: 100vh; display: flex; flex-direction: column; margin-left: var(--sidebar-w); }
+        .app-content { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 2rem 2.2rem; }
+        /* child templates wrap themselves in .container; neutralise the double padding */
+        .app-content .container, .app-content .container-fluid { max-width: 100%; padding-left: 0; padding-right: 0; }
+        .app-content .container.mt-4, .app-content .container.my-5 { margin-top: 0 !important; }
+        .app-footer {
+            padding: 1.4rem 2rem; text-align: center; color: var(--muted);
+            font-size: .85rem; border-top: 1px solid var(--line); background: var(--surface);
+        }
+        .app-footer p { margin: 0; }
+
+        @media (max-width: 991.98px) {
+            .app-sidebar { transform: translateX(-100%); box-shadow: var(--shadow-md); }
+            body.nav-open .app-sidebar { transform: none; }
+            body.nav-open .app-overlay { display: block; }
+            .app-topbar { display: flex; }
+            .app-main { margin-left: 0; }
+            .app-content { padding: 1.25rem 1rem; }
+        }
+
+        /* ============ Components (Bootstrap overrides) ============ */
         .card {
-            border: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,.1);
-            margin-bottom: 20px;
+            border: 1px solid var(--line); border-radius: var(--radius);
+            box-shadow: var(--shadow-sm); margin-bottom: 20px; background: var(--surface);
+            overflow: hidden;
         }
+        .card.border-0 { border: 1px solid var(--line) !important; }
+        .card-header { background: #fafbff; border-bottom: 1px solid var(--line); font-weight: 600; padding: .9rem 1.25rem; }
+        .card-header.bg-primary { background: var(--brand-gradient) !important; border-bottom: 0; color: #fff; }
+        .card-header.bg-white { background: #fff !important; }
+        .card-footer { background: #fafbff; border-top: 1px solid var(--line); padding: .8rem 1.25rem; }
+        .card-body { padding: 1.35rem; }
+        .shadow, .shadow-sm { box-shadow: var(--shadow-sm) !important; }
+
+        .btn { border-radius: 10px; font-weight: 600; padding: .5rem 1rem; transition: all .15s; }
+        .btn-sm { border-radius: 8px; padding: .3rem .7rem; }
+        .btn-lg { border-radius: 12px; }
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+            --bs-btn-bg: var(--brand); --bs-btn-border-color: var(--brand);
+            --bs-btn-hover-bg: var(--brand-dark); --bs-btn-hover-border-color: var(--brand-dark);
+            --bs-btn-active-bg: #141b57; --bs-btn-active-border-color: #141b57;
+            --bs-btn-focus-shadow-rgb: 40, 50, 150;
+            --bs-btn-disabled-bg: var(--brand); --bs-btn-disabled-border-color: var(--brand);
+            box-shadow: 0 2px 6px rgba(40, 50, 150, .25);
         }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        .btn-outline-primary {
+            --bs-btn-color: var(--brand); --bs-btn-border-color: var(--brand);
+            --bs-btn-hover-bg: var(--brand); --bs-btn-hover-border-color: var(--brand);
+            --bs-btn-active-bg: var(--brand-dark); --bs-btn-active-border-color: var(--brand-dark);
         }
-        .table-hover tbody tr:hover {
-            background-color: #f5f5f5;
+        .btn-secondary {
+            --bs-btn-bg: #334155; --bs-btn-border-color: #334155;
+            --bs-btn-hover-bg: #1e293b; --bs-btn-hover-border-color: #1e293b;
         }
+        .btn-outline-secondary { --bs-btn-color: #475569; --bs-btn-border-color: #cbd5e1; --bs-btn-hover-bg: #475569; --bs-btn-hover-border-color: #475569; }
+        .btn-warning { --bs-btn-bg: #f5b301; --bs-btn-border-color: #f5b301; --bs-btn-hover-bg: #d97706; --bs-btn-hover-border-color: #d97706; --bs-btn-color: #1f1300; }
+        .btn-info { --bs-btn-bg: #0284c7; --bs-btn-border-color: #0284c7; --bs-btn-hover-bg: #0369a1; --bs-btn-hover-border-color: #0369a1; --bs-btn-color: #fff; --bs-btn-hover-color: #fff; }
+        .btn-success { --bs-btn-bg: #16a34a; --bs-btn-border-color: #16a34a; --bs-btn-hover-bg: #15803d; --bs-btn-hover-border-color: #15803d; }
+        .btn-danger { --bs-btn-bg: #dc2626; --bs-btn-border-color: #dc2626; --bs-btn-hover-bg: #b91c1c; --bs-btn-hover-border-color: #b91c1c; }
+
+        .badge { border-radius: 999px; font-weight: 600; padding: .4em .75em; letter-spacing: .01em; }
+        .badge.bg-warning { color: #1f1300 !important; }
+
+        /* Tables */
+        .table-responsive {
+            background: var(--surface); border: 1px solid var(--line);
+            border-radius: var(--radius); box-shadow: var(--shadow-sm);
+        }
+        .table { --bs-table-striped-bg: #f7f8fd; --bs-table-hover-bg: var(--brand-soft); margin-bottom: 0; vertical-align: middle; }
+        .table > :not(caption) > * > * { padding: .85rem 1rem; border-bottom-color: var(--line); }
+        .table thead.table-dark, .table thead.table-light, .table .table-light, .table .table-dark {
+            --bs-table-bg: #eff2fb; --bs-table-color: #475569; --bs-table-border-color: var(--line);
+        }
+        .table thead th {
+            font-size: .74rem; text-transform: uppercase; letter-spacing: .07em;
+            font-weight: 700; color: #475569; background: #eff2fb; border-bottom: 1px solid var(--line);
+        }
+        .table tbody tr:last-child > * { border-bottom: 0; }
+
+        /* Forms */
+        .form-label { font-weight: 600; font-size: .88rem; color: #334155; }
+        .form-control, .form-select {
+            border-radius: 10px; border: 1px solid #ccd3ea; padding: .6rem .85rem; background-color: #fff;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--brand); box-shadow: 0 0 0 .25rem var(--brand-ring);
+        }
+        .form-check-input:checked { background-color: var(--brand); border-color: var(--brand); }
+        .input-group-text { border-radius: 10px; background: #eff2fb; border-color: #ccd3ea; }
+
+        /* Alerts */
+        .alert { border: 0; border-left: 4px solid; border-radius: 12px; box-shadow: var(--shadow-sm); }
+        .alert-info { background: #e0f2fe; color: #075985; border-color: #0284c7; }
+        .alert-success { background: #dcfce7; color: #166534; border-color: #16a34a; }
+        .alert-warning { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+        .alert-danger { background: #fee2e2; color: #991b1b; border-color: #dc2626; }
+
+        /* Breadcrumb, pagination, lists */
+        .breadcrumb { font-size: .85rem; margin-bottom: 1.25rem; }
+        .breadcrumb-item + .breadcrumb-item::before { color: #94a3b8; }
+        .breadcrumb-item.active { color: var(--muted); }
+        .pagination { --bs-pagination-active-bg: var(--brand); --bs-pagination-active-border-color: var(--brand); --bs-pagination-color: var(--brand); --bs-pagination-hover-color: var(--brand-dark); --bs-pagination-border-radius: 10px; --bs-pagination-focus-box-shadow: 0 0 0 .25rem var(--brand-ring); }
+        .list-group { border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+        .list-group-item { border-color: var(--line); padding: .85rem 1.1rem; }
+
+        /* Page headings inside content */
+        .app-content h1 { font-size: 1.75rem; font-weight: 800; }
+        code { color: var(--brand-dark); background: var(--brand-soft); padding: .1rem .4rem; border-radius: 6px; }
+
+        /* ============ Reusable blocks (home / login) ============ */
+        .hero {
+            position: relative; overflow: hidden; color: #fff;
+            background: var(--brand-gradient); border-radius: 22px;
+            padding: 2.6rem 2.4rem; box-shadow: var(--shadow-md);
+        }
+        .hero::before {
+            content: ""; position: absolute; right: -80px; top: -80px; width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(245, 179, 1, .38), transparent 65%);
+        }
+        .hero::after {
+            content: ""; position: absolute; inset: 0; opacity: .5;
+            background-image: radial-gradient(rgba(255, 255, 255, .12) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        .hero > * { position: relative; z-index: 1; }
+        .hero h1 { color: #fff; font-size: 2.1rem; font-weight: 800; margin-bottom: .4rem; }
+        .hero .lead { color: #dde3ff; font-weight: 500; }
+        .hero p { color: #cfd6fb; margin-bottom: 0; }
+        .hero-pill {
+            display: inline-flex; align-items: center; gap: .45rem; padding: .3rem .8rem; margin-bottom: 1rem;
+            background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .2);
+            border-radius: 999px; font-size: .78rem; font-weight: 600; color: #fff;
+        }
+
+        .stat-card { height: 100%; margin: 0; transition: transform .2s, box-shadow .2s; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .stat-icon {
+            width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+            font-size: 1.4rem; margin-bottom: 1rem;
+        }
+        .stat-icon.s-primary { background: #e0e4ff; }
+        .stat-icon.s-success { background: #dcfce7; }
+        .stat-icon.s-info { background: #e0f2fe; }
+        .stat-icon.s-warning { background: #fef3c7; }
+        .stat-title { font-size: .82rem; font-weight: 700; color: var(--muted); margin: 0; }
+        .stat-value { font-size: 2.4rem; font-weight: 800; line-height: 1.1; color: var(--ink); margin: .15rem 0 .2rem; }
+        .stat-label { color: var(--muted); font-size: .88rem; margin-bottom: 0; }
+
+        .section-title { display: flex; align-items: center; gap: .6rem; font-size: 1.2rem; margin-bottom: 1rem; }
+        .section-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+        .step-list { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+        .step-list li {
+            counter-increment: step; position: relative; padding: .7rem 0 .7rem 2.8rem;
+            border-bottom: 1px dashed var(--line);
+        }
+        .step-list li:last-child { border-bottom: 0; }
+        .step-list li::before {
+            content: counter(step); position: absolute; left: 0; top: .6rem;
+            width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+            background: var(--brand-soft); color: var(--brand); font-weight: 700; font-size: .85rem;
+        }
+
+        .link-chip {
+            display: flex; align-items: center; gap: .7rem; padding: .9rem 1.1rem;
+            background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+            color: var(--ink); font-weight: 600; box-shadow: var(--shadow-sm);
+            text-decoration: none !important; transition: all .15s;
+        }
+        .link-chip:hover { border-color: var(--brand); color: var(--brand); transform: translateY(-2px); }
+        .link-chip i { color: var(--brand); }
+        .link-chip .ext { margin-left: auto; font-size: .75rem; color: #94a3b8; }
+
+        .rbac-wrap { background: linear-gradient(135deg, #f3f5ff 0%, #f8fafc 100%); }
+        .cred-box { background: #f7f8fd; border: 1px solid var(--line); border-radius: 12px; padding: .9rem 1rem; }
+
+        /* Login */
+        .auth-shell { max-width: 460px; margin: 0 auto; }
+        .auth-head { text-align: center; padding: 1.8rem 1.5rem 1.5rem; }
+        .auth-head .auth-icon {
+            width: 58px; height: 58px; margin: 0 auto .9rem; border-radius: 18px;
+            display: grid; place-items: center; font-size: 1.6rem;
+            background: rgba(255, 255, 255, .15); border: 1px solid rgba(255, 255, 255, .25);
+        }
+
+
+        /* ============ BBU polish ============ */
+        .app-sidebar::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--red), #ff6b6f 60%, var(--accent));
+        }
+        .app-brand-logo-img { width: 46px; height: 54px; object-fit: contain; flex: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.35)); }
+        .topbar-logo { height: 30px; width: auto; margin-right: .4rem; vertical-align: middle; }
+        .footer-logo { height: 22px; width: auto; margin-right: .5rem; vertical-align: middle; }
+        .app-nav a.active { background: linear-gradient(90deg, rgba(255,255,255,.16), rgba(255,255,255,.05)); }
+        .app-avatar { box-shadow: 0 0 0 3px rgba(245, 179, 1, .25); }
+        .app-nav::-webkit-scrollbar, body::-webkit-scrollbar { width: 8px; }
+        .app-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 8px; }
+        body::-webkit-scrollbar-thumb { background: #c5cbe6; border-radius: 8px; }
+        ::selection { background: rgba(40, 50, 150, .18); }
+
+        /* page entrance */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        .app-content > * { animation: fadeUp .45s ease both; }
+        .app-content > *:nth-child(2) { animation-delay: .06s; }
+        .app-content > *:nth-child(3) { animation-delay: .12s; }
+        .app-content > *:nth-child(4) { animation-delay: .18s; }
+        @media (prefers-reduced-motion: reduce) { .app-content > * { animation: none; } }
+
+        /* headings get a red-gold tick like the logo ribbon */
+        .app-content h1, .app-content h2:first-of-type { position: relative; }
+        .app-content > .container > .row:first-child h1::after,
+        .app-content > .row:first-child h2::after,
+        .app-content > .container > .row > .col > h1::after {
+            content: ""; display: block; width: 46px; height: 4px; margin-top: .55rem;
+            border-radius: 4px; background: linear-gradient(90deg, var(--red) 0 60%, var(--accent) 60%);
+        }
+
+        /* "Label: value" paragraphs become tidy info rows */
+        .card-body p:has(> strong:first-child) {
+            display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap;
+            margin: 0; padding: .6rem 0; border-bottom: 1px dashed var(--line);
+        }
+        .card-body p:has(> strong:first-child):last-child { border-bottom: 0; }
+        .card-body p:has(> strong:first-child) > strong:first-child {
+            flex: 0 0 150px; font-size: .78rem; font-weight: 700; color: var(--muted);
+            text-transform: uppercase; letter-spacing: .05em;
+        }
+        .card-body h5 + p:has(> strong:first-child) { margin-top: .4rem; }
+
+        /* card headers with colour accents */
+        .card-header.bg-info { background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #fff; }
+        .card-header.bg-success { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: #fff; }
+        .card-header.bg-warning { background: linear-gradient(135deg, #f5b301, #e09f00) !important; color: #1f1300; }
+        .card-header.bg-danger { background: linear-gradient(135deg, #dc2626, #b91c1c) !important; color: #fff; }
+        .card-header.bg-dark { background: linear-gradient(135deg, #1c2470, #141b57) !important; color: #fff; }
+        .card-header h5, .card-header h4, .card-header h6 { color: inherit; margin: 0; }
+        .card-header.bg-primary h5, .card-header.bg-primary h4 { color: #fff; }
+
+        .btn-primary { background-image: linear-gradient(135deg, #3140b5, #283296 60%, #1c2470); border: 0; }
+        .btn-primary:hover { background-image: linear-gradient(135deg, #283296, #1c2470); transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .table tbody tr { transition: background .12s; }
+        .table tbody tr:hover > * { background-color: var(--brand-soft) !important; }
+        .table .btn-sm { box-shadow: none; }
+        .badge.bg-primary { background: linear-gradient(135deg, #3140b5, #1c2470) !important; }
+        .rounded-circle.bg-primary { background: linear-gradient(135deg, #3140b5, #1c2470) !important; }
+        .text-primary { color: var(--brand) !important; }
+        hr { border-color: var(--line); opacity: 1; }
+
+        /* Hero with logo */
+        .hero { background: var(--brand-gradient); border-top: 5px solid var(--red); }
+        .hero::after {
+            opacity: 1; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cpath fill='white' fill-opacity='.10' d='M22 12l3 6.2 6.8.9-5 4.8 1.2 6.8L22 27.4l-6 3.3 1.2-6.8-5-4.8 6.8-.9z'/%3E%3Cpath fill='white' fill-opacity='.07' d='M104 84l2.4 5 5.5.7-4 3.9 1 5.5-4.9-2.7-4.9 2.7 1-5.5-4-3.9 5.5-.7z'/%3E%3Cpath fill='white' fill-opacity='.05' d='M70 20l1.6 3.3 3.6.5-2.6 2.5.6 3.6-3.2-1.7-3.2 1.7.6-3.6-2.6-2.5 3.6-.5z'/%3E%3C/svg%3E");
+            background-size: 140px 140px;
+        }
+        .hero-split { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+        .hero-logo { height: 190px; width: auto; flex: none; filter: drop-shadow(0 14px 28px rgba(0,0,0,.4)); animation: floaty 6s ease-in-out infinite; }
+        @keyframes floaty { 50% { transform: translateY(-8px); } }
+        @media (max-width: 767.98px) { .hero-logo { display: none; } .hero { padding: 1.8rem 1.4rem; } .hero h1 { font-size: 1.6rem; } }
+
+        /* stat cards with colour accents */
+        .stat-card { position: relative; }
+        .stat-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--c, var(--brand)); }
+        .stat-card.v-primary { --c: #283296; } .stat-card.v-success { --c: #16a34a; }
+        .stat-card.v-info { --c: #0284c7; }    .stat-card.v-warning { --c: #f5b301; }
+        .stat-icon.s-primary { background: #e0e4ff; } .stat-icon.s-warning { background: #fff3c4; }
+        .stat-value { color: var(--brand); }
+
+        /* ============ Auth (login) page ============ */
+        body.auth-page .app-sidebar, body.auth-page .app-topbar, body.auth-page .app-footer, body.auth-page .app-overlay { display: none !important; }
+        body.auth-page .app-main { margin-left: 0; }
+        body.auth-page .app-content { padding: 0; max-width: none; }
+        body.auth-page .app-content > * { animation: none; }
+        .auth-split { min-height: 100vh; display: grid; grid-template-columns: minmax(340px, 5fr) 6fr; }
+        .auth-visual {
+            position: relative; overflow: hidden; color: #fff; text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 3rem 2rem; background: var(--brand-gradient); border-top: 5px solid var(--red);
+        }
+        .auth-visual::before {
+            content: ""; position: absolute; width: 520px; height: 520px; left: 50%; top: 46%;
+            transform: translate(-50%, -50%); border-radius: 50%;
+            background: radial-gradient(circle, rgba(245,179,1,.35), transparent 62%);
+        }
+        .auth-visual::after {
+            content: ""; position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cpath fill='white' fill-opacity='.10' d='M22 12l3 6.2 6.8.9-5 4.8 1.2 6.8L22 27.4l-6 3.3 1.2-6.8-5-4.8 6.8-.9z'/%3E%3Cpath fill='white' fill-opacity='.07' d='M104 84l2.4 5 5.5.7-4 3.9 1 5.5-4.9-2.7-4.9 2.7 1-5.5-4-3.9 5.5-.7z'/%3E%3C/svg%3E");
+            background-size: 140px 140px;
+        }
+        .auth-visual > * { position: relative; z-index: 1; }
+        .auth-logo { width: min(260px, 60%); height: auto; filter: drop-shadow(0 18px 30px rgba(0,0,0,.45)); animation: floaty 6s ease-in-out infinite; }
+        .auth-visual h2 { color: #fff; font-size: 1.9rem; font-weight: 800; margin: 1.6rem 0 .3rem; }
+        .auth-visual .sub { color: #dde3ff; font-weight: 600; margin: 0; }
+        .auth-visual .kh { color: #f5b301; font-weight: 600; margin: .3rem 0 0; }
+        .auth-back {
+            position: absolute !important; top: 1.2rem; left: 1.4rem; color: #fff; font-weight: 600; font-size: .88rem;
+            padding: .4rem .9rem; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+        }
+        .auth-back:hover { background: rgba(255,255,255,.24); color: #fff; text-decoration: none; }
+        .auth-panel { display: flex; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; background: var(--page); }
+        .auth-box { width: 100%; max-width: 460px; }
+        .auth-title { text-align: center; margin-bottom: 1.4rem; }
+        .auth-title .auth-icon {
+            width: 56px; height: 56px; margin: 0 auto .8rem; border-radius: 18px; display: grid; place-items: center;
+            font-size: 1.5rem; background: var(--brand-soft); border: 1px solid #d5dafc;
+        }
+        .auth-title h1 { font-size: 1.7rem; font-weight: 800; margin-bottom: .2rem; }
+        .auth-title p { color: var(--muted); margin: 0; }
+        @media (max-width: 991.98px) {
+            .auth-split { grid-template-columns: 1fr; min-height: 0; }
+            .auth-visual { padding: 4.2rem 1.5rem 2rem; }
+            .auth-logo { width: 120px; }
+            .auth-visual h2 { font-size: 1.4rem; margin-top: 1rem; }
+            .auth-visual::before { width: 300px; height: 300px; }
+        }
+
+        /* Registration / 403 logo */
+        .page-logo { height: 84px; width: auto; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35)); }
+        .forbidden-logo { height: 76px; width: auto; opacity: .95; margin-bottom: 1rem; }
+
+
+        /* fixes */
+        .app-auth-actions a.btn { padding: .6rem 1rem; display: flex; align-items: center; }
+        .app-auth-actions a.btn-warning, .app-auth-actions a.btn-warning:hover { color: #1f1300; }
+        .app-auth-actions a.btn-outline-light { color: #fff; border-color: rgba(255,255,255,.4); }
+        .app-auth-actions a.btn-outline-light:hover { background: rgba(255,255,255,.14); color: #fff; }
+        .btn-outline-info { --bs-btn-color: #0284c7; --bs-btn-border-color: #0284c7; --bs-btn-hover-bg: #0284c7; --bs-btn-hover-border-color: #0284c7; --bs-btn-hover-color: #fff; --bs-btn-active-bg: #0369a1; --bs-btn-active-border-color: #0369a1; --bs-btn-active-color: #fff; }
+        .btn-outline-danger { --bs-btn-color: #dc2626; --bs-btn-border-color: #dc2626; --bs-btn-hover-bg: #dc2626; --bs-btn-hover-border-color: #dc2626; }
+        .btn-outline-success { --bs-btn-color: #16a34a; --bs-btn-border-color: #16a34a; --bs-btn-hover-bg: #16a34a; --bs-btn-hover-border-color: #16a34a; }
+        .cred-box .btn { white-space: nowrap; }
+        .cred-box > div { flex-wrap: wrap; gap: .4rem; }
+
+        @media print { .app-sidebar, .app-topbar, .app-overlay { display: none !important; } .app-main { margin-left: 0 !important; } }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">📚 Student Management System</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        {% if user.is_authenticated and not user.is_staff and user.student %}
-                            <a class="nav-link" href="{% url 'students:student_detail' user.student.pk %}">My Profile</a>
-                        {% else %}
-                            <a class="nav-link" href="{% url 'students:student_list' %}">Students</a>
-                        {% endif %}
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'courses:course_list' %}">Courses</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'enrollments:enrollment_list' %}">Enrollments</a>
-                    </li>
-                    {% if user.is_authenticated %}
-                    {% if user.is_staff %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/">Admin Panel</a>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item dropdown ms-lg-2">
-                        <a class="nav-link dropdown-toggle btn btn-sm btn-outline-light text-white px-3" href="#" role="button" data-bs-toggle="dropdown">
-                            👤 {{ user.username }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <li><span class="dropdown-item-text text-muted small">{{ user.email|default:"No email" }}</span></li>
-                            {% if user.student %}
-                            <li><a class="dropdown-item" href="{% url 'students:student_detail' user.student.pk %}">👤 My Profile</a></li>
-                            <li><a class="dropdown-item" href="{% url 'enrollments:student_transcript' user.student.student_id %}">📄 My Transcript</a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                        </ul>
-                    </li>
-                    {% else %}
-                    <li class="nav-item ms-lg-2">
-                        <a class="nav-link btn btn-sm btn-outline-light text-white px-3 me-2" href="{% url 'login' %}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-sm btn-light text-primary fw-bold px-3" href="{% url 'students:register' %}">Register</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+<body class="{% block body_class %}{% endblock %}">
+    {% with ns=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
 
-    <div class="container mt-4">
-        {% if messages %}
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <!-- Mobile top bar -->
+    <div class="app-topbar">
+        <a class="brand" href="{% url 'home' %}"><img src="{% static 'images/bbu-logo.png' %}" alt="BBU" class="topbar-logo"> Student Management System</a>
+        <button class="app-toggle" type="button" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    <div class="app-overlay" id="navOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+        <a class="app-brand" href="{% url 'home' %}">
+            <img src="{% static 'images/bbu-logo.png' %}" alt="Build Bright University" class="app-brand-logo-img">
+            <span class="app-brand-text">
+                <strong>Student Management System</strong>
+                <small>Build Bright University</small>
+            </span>
+        </a>
+
+        <nav class="app-nav">
+            <div class="app-nav-label">Menu</div>
+            <a href="{% url 'home' %}" class="{% if url_name == 'home' and not ns %}active{% endif %}">
+                <i class="fas fa-house"></i> Home
+            </a>
+            {% if user.is_authenticated and not user.is_staff and user.student %}
+                <a href="{% url 'students:student_detail' user.student.pk %}" class="{% if ns == 'students' %}active{% endif %}">
+                    <i class="fas fa-id-card"></i> My Profile
+                </a>
+            {% else %}
+                <a href="{% url 'students:student_list' %}" class="{% if ns == 'students' %}active{% endif %}">
+                    <i class="fas fa-user-graduate"></i> Students
+                </a>
+            {% endif %}
+            <a href="{% url 'courses:course_list' %}" class="{% if ns == 'courses' %}active{% endif %}">
+                <i class="fas fa-book-open"></i> Courses
+            </a>
+            <a href="{% url 'enrollments:enrollment_list' %}" class="{% if ns == 'enrollments' %}active{% endif %}">
+                <i class="fas fa-clipboard-list"></i> Enrollments
+            </a>
+            {% if user.is_authenticated and user.is_staff %}
+                <a href="/admin/"><i class="fas fa-shield-halved"></i> Admin Panel</a>
+            {% endif %}
+        </nav>
+
+        <div class="app-user">
+            {% if user.is_authenticated %}
+                <div class="app-user-card">
+                    <span class="app-avatar">{{ user.username|slice:":1"|upper }}</span>
+                    <div>
+                        <div class="name">👤 {{ user.username }}</div>
+                        <div class="mail">{{ user.email|default:"No email" }}</div>
+                    </div>
+                </div>
+                {% if user.student %}
+                <a href="{% url 'students:student_detail' user.student.pk %}"><i class="fas fa-user"></i> My Profile</a>
+                <a href="{% url 'enrollments:student_transcript' user.student.student_id %}"><i class="fas fa-file-lines"></i> My Transcript</a>
+                {% endif %}
+                <a href="{% url 'logout' %}" class="logout"><i class="fas fa-right-from-bracket"></i> Logout</a>
+            {% else %}
+                <div class="app-auth-actions">
+                    <a class="btn btn-outline-light" href="{% url 'login' %}">Login</a>
+                    <a class="btn btn-warning" href="{% url 'students:register' %}">Register</a>
+                </div>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="app-main">
+        <main class="app-content">
+            {% if messages %}
             {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
                 <div>{{ message }}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
             {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        {% block content %}{% endblock %}
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="app-footer">
+            <p><img src="{% static 'images/bbu-logo.png' %}" alt="" class="footer-logo"> © 2026 Build Bright University - Student Management System</p>
+        </footer>
     </div>
 
-    <footer class="bg-light text-center py-4 mt-5">
-        <p class="text-muted">© 2026 Build Bright University - Student Management System</p>
-    </footer>
+    {% endwith %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            var body = document.body;
+            var toggle = document.getElementById('navToggle');
+            var overlay = document.getElementById('navOverlay');
+            function setOpen(open) {
+                body.classList.toggle('nav-open', open);
+                if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+            if (toggle) toggle.addEventListener('click', function () { setOpen(!body.classList.contains('nav-open')); });
+            if (overlay) overlay.addEventListener('click', function () { setOpen(false); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+        })();
+    </script>
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>

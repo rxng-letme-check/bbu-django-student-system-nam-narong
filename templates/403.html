@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}403 Forbidden - Access Denied{% endblock %}
 
@@ -7,6 +8,7 @@
     <div class="col-md-8 col-lg-6 text-center">
         <div class="card shadow-sm border-0 p-5">
             <div class="mb-4">
+                <img src="{% static 'images/bbu-logo.png' %}" alt="Build Bright University" class="forbidden-logo d-block mx-auto">
                 <span style="font-size: 4rem;">🔒</span>
             </div>
             <h1 class="display-6 fw-bold text-danger mb-2">403 - ការអនុញ្ញាតត្រូវបានបដិសេធ</h1>

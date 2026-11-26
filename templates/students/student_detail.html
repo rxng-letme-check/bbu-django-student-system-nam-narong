@@ -165,14 +165,14 @@
             href="{% url 'enrollments:student_transcript' student.student_id %}"
             class="btn btn-info text-white btn-sm w-100 mb-2"
           >
-            <i class="fas fa-file-alt"></i> 📄 View Transcript
+            📄 View Transcript
           </a>
           {% if user.is_staff or user == student.user %}
           <a
             href="{% url 'students:student_update' student.id %}"
             class="btn btn-warning btn-sm w-100 mb-2"
           >
-            <i class="fas fa-edit"></i> ✏️ Edit Profile
+            ✏️ Edit Profile
           </a>
           {% endif %}
           {% if user.is_staff %}
@@ -180,7 +180,7 @@
             href="{% url 'students:student_delete' student.id %}"
             class="btn btn-danger btn-sm w-100 mb-2"
           >
-            <i class="fas fa-trash"></i> 🗑️ Delete Student
+            🗑️ Delete Student
           </a>
           <a
             href="{% url 'students:student_list' %}"
