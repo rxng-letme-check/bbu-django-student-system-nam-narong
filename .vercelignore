@@ -1,0 +1,15 @@
+venv
+.venv
+.env
+.env.local
+db.sqlite3
+__pycache__
+staticfiles
+staticfiles_build
+.vscode
+render.yaml
+Procfile
+build.sh
+setup.bat
+run.bat
+setup.sh
